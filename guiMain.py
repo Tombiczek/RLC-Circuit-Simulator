@@ -1,31 +1,90 @@
 import tkinter as tk
+from tkinter import ttk
+
+LARGEFONT = ("Verdana", 35)
 
 
-def main():
-    def New_Window():
-        Window = tk.Toplevel()
-        canvas = tk.Canvas(Window, height=HEIGHT, width=WIDTH)
-        canvas.pack()
+class tkinterApp(tk.Tk):
 
-    HEIGHT = 500
-    WIDTH = 700
+    # __init__ function for class tkinterApp
+    def __init__(self, *args, **kwargs):
+        # __init__ function for class Tk
+        tk.Tk.__init__(self, *args, **kwargs)
 
-    ws = tk.Tk()
-    ws.title("RLC Circuit Simulator")
-    canvas = tk.Canvas(ws, height=HEIGHT, width=WIDTH)
-    canvas.pack()
+        # creating a container
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
 
-    button_series = tk.Button(ws, text="Series", bg='White', fg='Black',
-                       command=lambda: New_Window())
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
-    button_parallel = tk.Button(ws, text="Parallel", bg='White', fg='Black',
-                       command=lambda: New_Window())
+        # initializing frames to an empty array
+        self.frames = {}
 
-    button_series.place(x=120, y=140)
-    button_parallel.place(x=380, y=140)
+        # iterating through a tuple consisting
+        # of the different page layouts
+        for F in (StartPage, Page1):
+            frame = F(container, self)
 
-    ws.mainloop()
+            # initializing frame of that object from
+            # startpage, page1, page2 respectively with
+            # for loop
+            self.frames[F] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    # to display the current frame passed as
+    # parameter
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
 
 
-if __name__ == '__main__':
-    main()
+# first window frame startpage
+
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        # label of frame Layout 2
+        label = ttk.Label(self, text="RLC-Circuit simulator", font=LARGEFONT)
+
+        # putting the grid in its place by using
+        # grid
+        label.grid(row=0, column=4, padx=10, pady=10)
+
+        button1 = ttk.Button(self, text="Page 1",
+                             command=lambda: controller.show_frame(Page1))
+
+        # putting the button in its place by
+        # using grid
+        button1.grid(row=1, column=1, padx=10, pady=10)
+
+
+# second window frame page1
+class Page1(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text="Enter Values", font=LARGEFONT)
+        label.grid(row=0, column=4, padx=10, pady=10)
+
+        button1 = ttk.Button(self, text="StartPage",
+                             command=lambda: controller.show_frame(StartPage))
+        button1.grid(row=3, column=1, padx=10, pady=10)
+
+        tk.Label(self, text="First Name").grid(row=1)
+        tk.Label(self, text="Last Name").grid(row=2)
+
+        e1 = tk.Entry(self)
+        e2 = tk.Entry(self)
+
+        e1.grid(row=1, column=1)
+        e2.grid(row=2, column=1)
+
+
+# Driver Code
+app = tkinterApp()
+app.mainloop()
