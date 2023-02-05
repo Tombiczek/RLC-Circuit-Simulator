@@ -73,16 +73,31 @@ class Page1(tk.Frame):
 
         button1 = ttk.Button(self, text="StartPage",
                              command=lambda: controller.show_frame(StartPage))
-        button1.grid(row=3, column=1, padx=10, pady=10)
+        button2 = ttk.Button(self, text="Start",
+                             command=lambda: controller.show_frame(StartPage))
+        button1.grid(row=3, column=3, padx=10, pady=10)
+        button2.grid(row=3, column=4, padx=10, pady=10)
 
-        tk.Label(self, text="First Name").grid(row=1)
-        tk.Label(self, text="Last Name").grid(row=2)
+        tk.Label(self, text="Va").grid(row=1)
+        tk.Label(self, text="f").grid(row=2)
+        tk.Label(self, text="R1").grid(row=3)
+        tk.Label(self, text="L1").grid(row=4)
+        tk.Label(self, text="C1").grid(row=5)
+        tk.Label(self, text="").grid(row=6)
 
         e1 = tk.Entry(self)
         e2 = tk.Entry(self)
+        e3 = tk.Entry(self)
+        e4 = tk.Entry(self)
+        e5 = tk.Entry(self)
+        e6 = tk.Entry(self)
 
         e1.grid(row=1, column=1)
         e2.grid(row=2, column=1)
+        e3.grid(row=3, column=1)
+        e4.grid(row=4, column=1)
+        e5.grid(row=5, column=1)
+        e6.grid(row=6, column=1)
 
 
 # Driver Code

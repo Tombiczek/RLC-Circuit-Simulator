@@ -14,18 +14,22 @@ from PySpice.Probe.Plot import plot
 from PySpice.Spice.Library import SpiceLibrary
 from PySpice.Spice.Netlist import Circuit
 from PySpice.Unit import *
+import tkinter as tk
+from tkinter import ttk
 
 from engineering_notation import EngNumber
 
 from matplotlib.ticker import EngFormatter
 
-def Main_Circuit():
+LARGEFONT = ("Verdana", 35)
 
+
+def Main_Circuit(v_a, f_, r_1, c_1, l_1):
     circuit = Circuit('Series RLC Circuit')
 
     # Define amplitude and frequency of input sinusoid
-    Va = 1 @ u_V
-    f = 5 @ u_kHz
+    Va = v_a @ u_V
+    f = f_ @ u_kHz
     Vo = 0
     Td = 0
     Df = 0
@@ -35,19 +39,17 @@ def Main_Circuit():
                                     =Vo, delay=Td, damping_factor=Df)
 
     # Set R = 4k for over damped, R = 2k for critically damped and R=500 for under damped
-    R1 = circuit.R(1, 'input', 'a', 2000 @ u_Ω)
-    L1 = circuit.L(1, 'a', 'out', 47 @ u_mH)
-    C1 = circuit.C(1, 'out', circuit.gnd, 47 @ u_nF)
+    R1 = circuit.R(1, 'input', 'a', r_1 @ u_Ω)
+    L1 = circuit.L(1, 'a', 'out', c_1 @ u_mH)
+    C1 = circuit.C(1, 'out', circuit.gnd, l_1 @ u_nF)
 
     # Define transient simulation step time and stop time
     steptime = 0.1 @ u_us
     finaltime = 5 * (1 / f)
 
-
     # Simulation: Transient Analysis
     simulator = circuit.simulator(temperature=25, nominal_temperature=25)
     analysis = simulator.transient(step_time=steptime, end_time=finaltime)
-
 
     # Theory: Phasor circuit analysis
 
@@ -95,7 +97,6 @@ def Main_Circuit():
         print('Series RLC circuit is underdamped')
         print('-----------')
 
-
     # Plotting Simulation Results
     plt.style.use('dark_background')
     figure = plt.subplots(figsize=(11, 6))
@@ -120,7 +121,6 @@ def Main_Circuit():
                 , 'sim:$v_{L}(t)$', 'theory:$v_{L}(t)$'), loc='lower right')
     # plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
     cursor = Cursor(axe, useblit=True, color='red', linewidth=1)
-
 
     # Plotting Phasor Diagram
 
@@ -151,3 +151,102 @@ def Main_Circuit():
 
 
 Main_Circuit()
+
+
+class tkinterApp(tk.Tk):
+
+    # __init__ function for class tkinterApp
+    def __init__(self, *args, **kwargs):
+        # __init__ function for class Tk
+        tk.Tk.__init__(self, *args, **kwargs)
+
+        # creating a container
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        # initializing frames to an empty array
+        self.frames = {}
+
+        # iterating through a tuple consisting
+        # of the different page layouts
+        for F in (StartPage, Page1):
+            frame = F(container, self)
+
+            # initializing frame of that object from
+            # startpage, page1, page2 respectively with
+            # for loop
+            self.frames[F] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    # to display the current frame passed as
+    # parameter
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
+
+
+# first window frame startpage
+
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        # label of frame Layout 2
+        label = ttk.Label(self, text="RLC-Circuit simulator", font=LARGEFONT)
+
+        # putting the grid in its place by using
+        # grid
+        label.grid(row=0, column=4, padx=10, pady=10)
+
+        button1 = ttk.Button(self, text="Page 1",
+                             command=lambda: controller.show_frame(Page1))
+
+        # putting the button in its place by
+        # using grid
+        button1.grid(row=1, column=1, padx=10, pady=10)
+
+
+# second window frame page1
+class Page1(tk.Frame):
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text="Enter Values", font=LARGEFONT)
+        label.grid(row=0, column=4, padx=10, pady=10)
+
+        button1 = ttk.Button(self, text="StartPage",
+                             command=lambda: controller.show_frame(StartPage))
+        button2 = ttk.Button(self, text="Start",
+                             command=lambda: controller.Main_Circuit(x1=e1.get(), x2=e2.get(), x3=e3.get(),
+                                                                     x4=e4.get(), x5=e5.get()))
+        button1.grid(row=3, column=3, padx=10, pady=10)
+        button2.grid(row=3, column=4, padx=10, pady=10)
+
+        tk.Label(self, text="Va").grid(row=1)
+        tk.Label(self, text="f").grid(row=2)
+        tk.Label(self, text="R1").grid(row=3)
+        tk.Label(self, text="L1").grid(row=4)
+        tk.Label(self, text="C1").grid(row=5)
+
+        e1 = tk.Entry(self)
+        e2 = tk.Entry(self)
+        e3 = tk.Entry(self)
+        e4 = tk.Entry(self)
+        e5 = tk.Entry(self)
+
+        e1.grid(row=1, column=1)
+        e2.grid(row=2, column=1)
+        e3.grid(row=3, column=1)
+        e4.grid(row=4, column=1)
+        e5.grid(row=5, column=1)
+
+
+# Driver Code
+app = tkinterApp()
+app.mainloop()
