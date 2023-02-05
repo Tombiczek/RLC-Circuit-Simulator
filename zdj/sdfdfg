@@ -22,13 +22,13 @@ from engineering_notation import EngNumber
 from matplotlib.ticker import EngFormatter
 
 
-def Main_Circuit(x1, x2, x3 ,x4, x5):
+def Main_Circuit():
 
     circuit = Circuit('Series RLC Circuit')
 
     # Define amplitude and frequency of input sinusoid
-    Va = x1 @ u_V
-    f = x2 @ u_kHz
+    Va = 1 @ u_V
+    f = 5 @ u_kHz
     Vo = 0
     Td = 0
     Df = 0
@@ -38,9 +38,9 @@ def Main_Circuit(x1, x2, x3 ,x4, x5):
                                     =Vo, delay=Td, damping_factor=Df)
 
     # Set R = 4k for over damped, R = 2k for critically damped and R=500 for under damped
-    R1 = circuit.R(1, 'input', 'a', x3 @ u_Ω)
-    L1 = circuit.L(1, 'a', 'out', x4 @ u_mH)
-    C1 = circuit.C(1, 'out', circuit.gnd, x5 @ u_nF)
+    R1 = circuit.R(1, 'input', 'a', 2000 @ u_Ω)
+    L1 = circuit.L(1, 'a', 'out', 47 @ u_mH)
+    C1 = circuit.C(1, 'out', circuit.gnd, 47 @ u_nF)
 
     # Define transient simulation step time and stop time
     steptime = 0.1 @ u_us
@@ -151,39 +151,6 @@ def Main_Circuit(x1, x2, x3 ,x4, x5):
 
     plt.tight_layout()
     plt.show()
-   
-
-LARGEFONT = ("Verdana", 35)
-
-r = tk.Tk()
-r.title('Counting Seconds')
-label = tk.Label(text="Enter Values", font=LARGEFONT)
-label.grid(row=0, column=4, padx=10, pady=10)
-
-tk.Label(text="Va").grid(row=1)
-tk.Label(text="f").grid(row=2)
-tk.Label(text="R1").grid(row=3)
-tk.Label(text="L1").grid(row=4)
-tk.Label(text="C1").grid(row=5)
-
-e1 = tk.Entry(r)
-e2 = tk.Entry(r)
-e3 = tk.Entry(r)
-e4 = tk.Entry(r)
-e5 = tk.Entry(r)
-e1.grid(row=1, column=1)
-e2.grid(row=2, column=1)
-e3.grid(row=3, column=1)
-e4.grid(row=4, column=1)
-e5.grid(row=5, column=1)
 
 
-dupa = tk.Button(text="dupa", command=lambda: print(type(float(e2.get()))))
-
-
-button2 = tk.Button(text="Start", command=lambda: Main_Circuit(float(e1.get()), float(e2.get()), float(e3.get()), float(e4.get()), float(e5.get())))
-
-button2.grid(row=3, column=4, padx=10, pady=10)
-dupa.grid(row=3, column=6, padx=10, pady=10)
-
-r.mainloop()
+Main_Circuit()
