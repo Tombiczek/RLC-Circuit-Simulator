@@ -41,11 +41,9 @@ C1 = circuit.C(1, 'out', circuit.gnd, 47 @ u_nF)
 steptime = 0.1 @ u_us
 finaltime = 5 * (1 / f)
 
-
 # Simulation: Transient Analysis
 simulator = circuit.simulator(temperature=25, nominal_temperature=25)
 analysis = simulator.transient(step_time=steptime, end_time=finaltime)
-
 
 # Theory: Phasor circuit analysis
 
@@ -93,7 +91,6 @@ else:
     print('Series RLC circuit is underdamped')
     print('-----------')
 
-
 # Plotting Simulation Results
 
 figure = plt.subplots(figsize=(11, 6))
@@ -118,7 +115,6 @@ plt.legend(('sim:$v_{in}(t)$', 'sim:$v_{C}(t)$', 'theory:$v_{C}(t)$',
             , 'sim:$v_{L}(t)$', 'theory:$v_{L}(t)$'), loc='lower right')
 # plt.ticklabel_format(axis="x", style="sci", scilimits=(0,0))
 cursor = Cursor(axe, useblit=True, color='red', linewidth=1)
-
 
 # Plotting Phasor Diagram
 
