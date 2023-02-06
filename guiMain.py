@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Cursor
 from matplotlib.pyplot import semilogx
 from matplotlib import pyplot
-
+from multiprocessing import Process
 import PySpice.Logging.Logging as Logging
 
 logger = Logging.setup_logging()
@@ -70,34 +70,10 @@ def Main_Circuit(x1, x2, x3 ,x4, x5):
     vR = abs(VR) * np.sin(2 * math.pi * f * time + np.angle(VR))
     vL = abs(VL) * np.sin(2 * math.pi * f * time + np.angle(VL))
 
-    print('----------')
-    print('Impedances')
-    print('----------')
-    print('Resistor Impedance ={} Ω'.format(EngNumber(float(Z_R))))
-    print('Capacitor Impedance = {:.2f} Ω'.format(Z_C))
-    print('Inductor Impedance = {:.2f} Ω'.format(Z_L))
 
     alpha = float(circuit.R1.resistance / (2 * circuit.L1.inductance))
     omega0 = float(math.sqrt(1 / (circuit.L1.inductance * circuit.C1.capacitance)))
     damping_ratio = float(alpha / omega0)
-
-    print('Alpha ={} rad/s'.format(EngNumber(alpha)))
-    print('Omega_0 ={} rad/s'.format(EngNumber(omega0)))
-    print('Damping ratio ={}'.format(EngNumber(damping_ratio)))
-
-    if damping_ratio == 1:
-        print('-----------------')
-        print('Series RLC circuit is critically damped')
-        print('-----------------')
-    elif damping_ratio > 1:
-        print('-----------')
-        print('Series RLC circuit is overdamped')
-        print('------------')
-    else:
-        print('-----------')
-        print('Series RLC circuit is underdamped')
-        print('-----------')
-
 
     # Plotting Simulation Results
     plt.style.use('dark_background')
@@ -151,6 +127,65 @@ def Main_Circuit(x1, x2, x3 ,x4, x5):
 
     plt.tight_layout()
     plt.show()
+
+
+
+def Printer(x1, x2, x3 ,x4, x5):
+
+    circuit = Circuit('Series RLC Circuit')
+
+    Va = x1 @ u_V
+    f = x2 @ u_kHz
+    Vo = 0
+    Td = 0
+    Df = 0
+
+    circuit.SinusoidalVoltageSource(1, 'input', circuit.gnd,
+                                    amplitude=Va, frequency=f, offset
+                                    =Vo, delay=Td, damping_factor=Df)
+
+
+    R1 = circuit.R(1, 'input', 'a', x3 @ u_Ω)
+    L1 = circuit.L(1, 'a', 'out', x4 @ u_mH)
+    C1 = circuit.C(1, 'out', circuit.gnd, x5 @ u_nF)
+
+    steptime = 0.1 @ u_us
+    finaltime = 5 * (1 / f)
+
+
+    simulator = circuit.simulator(temperature=25, nominal_temperature=25)
+    analysis = simulator.transient(step_time=steptime, end_time=finaltime)
+
+    time = np.array(analysis.time)
+    Vin = Va
+    Z_R = circuit.R1.resistance
+    Z_C = (1 / (1j * 2 * math.pi * f * circuit.C1.capacitance))
+    Z_L = 1j * 2 * math.pi * f * circuit.L1.inductance
+
+    Z_T = Z_L + Z_R + Z_C
+
+    VL = (Z_L / Z_T) * Vin
+    VR = (Z_R / Z_T) * Vin
+    VC = (Z_C / Z_T) * Vin
+    vC = abs(VC) * np.sin(2 * math.pi * f * time + np.angle(VC))
+    vR = abs(VR) * np.sin(2 * math.pi * f * time + np.angle(VR))
+    vL = abs(VL) * np.sin(2 * math.pi * f * time + np.angle(VL))
+
+    z1=('Impedancje')+"\n"+('----------')+"\n"+('Impedancja Rezystora ={} Ω'.format(EngNumber(float(Z_R))))+"\n"+('Impedancja Kondensator = {:.2f} Ω'.format(Z_C))+"\n"+('Impedancja Cewki  = {:.2f} Ω'.format(Z_L))+"\n"
+
+    alpha = float(circuit.R1.resistance / (2 * circuit.L1.inductance))
+    omega0 = float(math.sqrt(1 / (circuit.L1.inductance * circuit.C1.capacitance)))
+    damping_ratio = float(alpha / omega0)
+
+    z2=('Alpha ={} rad/s'.format(EngNumber(alpha)))+"\n"+('Omega_0 ={} rad/s'.format(EngNumber(omega0)))+"\n"+('Współczynnik tłumienia  ={}'.format(EngNumber(damping_ratio)))+"\n"
+
+    if damping_ratio == 1:
+        z3=('-----------------')+"\n"+('Obwód szeregowy RLC jest krytycznie tłumiony')
+    elif damping_ratio > 1:
+        z3=('-----------')+"\n"+('Obwód szeregowy RLC jest przetłumiony')
+    else:
+        z3=('-----------')+"\n"+('Obwód szeregowy RLC jest niedotłumiony')
+    return(z1+z2+z3)
    
 
 LARGEFONT = ("Verdana", 35)
@@ -178,12 +213,18 @@ e4.grid(row=4, column=1)
 e5.grid(row=5, column=1)
 
 
-dupa = tk.Button(text="dupa", command=lambda: print(type(float(e2.get()))))
 
+
+def open_new():
+    new_win = tk.Toplevel(r)
+    new_win.title("Informacje")
+    new_win.geometry("600x450")
+    tk.Label(new_win, text=Printer(float(e1.get()), float(e2.get()), float(e3.get()), float(e4.get()), float(e5.get())), font='Georgia 15 bold').pack(pady=30)
 
 button2 = tk.Button(text="Start", command=lambda: Main_Circuit(float(e1.get()), float(e2.get()), float(e3.get()), float(e4.get()), float(e5.get())))
+dupa = tk.Button(text="Info", command=lambda: open_new()) 
 
 button2.grid(row=3, column=4, padx=10, pady=10)
-dupa.grid(row=3, column=6, padx=10, pady=10)
+dupa.grid(row=3, column=5, padx=10, pady=10)
 
 r.mainloop()
